@@ -30,7 +30,7 @@ void MainContentComponent::prepareToPlay(int samplesPerBlockExpected, double sam
 {
 
     startTimer(FRAME_TIMER, 1000/60);
-    startTimer(OUTPUT_TIMER, 1000);
+    startTimer(OUTPUT_TIMER, 100);
 
     currentBlockSize = samplesPerBlockExpected;
     currentSampleRate = sampleRate;
@@ -80,23 +80,6 @@ void MainContentComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo 
         }
     }
 
-    int max2 = minIndex;
-    int maxsearch = maxLocation * 3 / 4;
-    for (int i = minIndex + 1; i < maxsearch; ++i)
-    {
-        if (spectrum[i] > spectrum[max2])
-        {
-            max2 = i;
-        }
-    }
-    if (abs(max2 * 2 - maxLocation) < 4)
-    {
-        if (spectrum[max2] / spectrum[maxLocation] > 0.02)
-        {
-            maxLocation = max2;
-        }
-    }
-
     pitchTestIndex = (maxLocation * currentSampleRate / currentBlockSize) / 2;
 
 }
@@ -118,12 +101,13 @@ bool MainContentComponent::keyPressed(const juce::KeyPress& key, juce::Component
 void MainContentComponent::timerCallback(int timerID)
 {
 
-    if (timerID == OUTPUT_TIMER) { printf("%f : %f, %d\n", RMSTest, pitchTestIndex); return; }
+    if (timerID == OUTPUT_TIMER) { printf("%f : %d\n", RMSTest, pitchTestIndex); return; }
 
 
     if (pitchTestIndex > 1000)
     {
-        playerVelocity -= pitchTestIndex / 1000;
+        player.translate(0, -5);
+        playerVelocity -= pitchTestIndex / 2000;
     }
 
     if (player.getY() + player.getWidth() < floor.getY())
@@ -133,6 +117,10 @@ void MainContentComponent::timerCallback(int timerID)
 
         player.translate(0, playerVelocity);
 
+    }
+    else
+    {
+        playerVelocity = 0;
     }
 
     repaint();
