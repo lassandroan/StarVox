@@ -1,5 +1,7 @@
 #include "MainComponent.h"
 
+#include <math.h>
+
 #include "../Lib/fftsg_h.c"
 
 MainContentComponent::MainContentComponent()
@@ -44,28 +46,26 @@ void MainContentComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo 
 
     for (int i = 0; i < currentBlockSize; ++i)
     {
+        double window = 0.50 * (1 - cos((2 * M_PI * i) / (currentBlockSize  - 1)));
         double sample  = (double)bufferToFill.buffer->getSample(0, i);
-        double hamming = 0.50 * (1 - cos((2 * M_PI * i) / (currentBlockSize - 1)));
 
-        signal[i] = hamming * sample;
-
+        signal[i] = window * sample;
         signal[i + currentBlockSize] = 0.0;
     }
 
-    rdft(currentBlockSize, 1, signal);
+    rdft(currentBlockSize * 2, 1, signal);
 
-    double spectrum[currentBlockSize];
-    for (int i = 0; i < currentBlockSize - 1; ++i)
+    double spectrum[currentBlockSize / 2];
+    for (int i = 0; i < (currentBlockSize / 2) - 1; ++i)
     {
         double re = signal[2 * i];
         double im = signal[2 * i + 1];
         spectrum[i] = sqrt(re * re + im * im);
     }
 
-    int numHarmonics = 16;
+    int numHarmonics = 5;
     int minIndex = 1;
-    int maxIndex = (currentBlockSize) / numHarmonics;
-
+    int maxIndex = (currentBlockSize / 2) / numHarmonics;
     int maxLocation = minIndex;
 
     for (int j = minIndex; j <= maxIndex; ++j)
@@ -91,13 +91,13 @@ void MainContentComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo 
     }
     if (abs(max2 * 2 - maxLocation) < 4)
     {
-        if (spectrum[max2] / spectrum[maxLocation] > 0.2)
+        if (spectrum[max2] / spectrum[maxLocation] > 0.02)
         {
             maxLocation = max2;
         }
     }
 
-    pitchTestIndex = (maxLocation * currentSampleRate / currentBlockSize);
+    pitchTestIndex = (maxLocation * currentSampleRate / currentBlockSize) / 2;
 
 }
 
@@ -118,7 +118,7 @@ bool MainContentComponent::keyPressed(const juce::KeyPress& key, juce::Component
 void MainContentComponent::timerCallback(int timerID)
 {
 
-    if (timerID == OUTPUT_TIMER) { printf("%f : %f, %d\n", RMSTest, pitchTest, pitchTestIndex); return; }
+    if (timerID == OUTPUT_TIMER) { printf("%f : %f, %d\n", RMSTest, pitchTestIndex); return; }
 
 
     if (pitchTestIndex > 1000)
