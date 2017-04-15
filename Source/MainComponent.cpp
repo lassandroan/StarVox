@@ -13,7 +13,7 @@ MainContentComponent::MainContentComponent()
     setWantsKeyboardFocus(true);
 
     floor.setBounds(0, 768 - 128, 768, 128);
-    player.setBounds(25, 256, 32, 32);
+    player.setBounds(25, 384-32, 32, 32);
 
     playerVelocity = 0.0f;
 
@@ -101,26 +101,16 @@ bool MainContentComponent::keyPressed(const juce::KeyPress& key, juce::Component
 void MainContentComponent::timerCallback(int timerID)
 {
 
-    if (timerID == OUTPUT_TIMER) { printf("%f : %d\n", RMSTest, pitchTestIndex); return; }
-
-
-    if (pitchTestIndex > 1000)
-    {
-        player.translate(0, -5);
-        playerVelocity -= pitchTestIndex / 2000;
-    }
-
-    if (player.getY() + player.getWidth() < floor.getY())
+    if (timerID == OUTPUT_TIMER)
     {
 
-        playerVelocity += 0.025;
+        float diff = ((float)pitchTestIndex / 2000.0f);
+        player.setY(576.0f - ((576.0f - 192.0f) * diff) - 32.0f);
 
-        player.translate(0, playerVelocity);
+        printf("%f : %d\n", RMSTest, pitchTestIndex);
 
-    }
-    else
-    {
-        playerVelocity = 0;
+        return;
+
     }
 
     repaint();
