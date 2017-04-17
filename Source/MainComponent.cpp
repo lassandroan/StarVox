@@ -53,7 +53,7 @@ void MainContentComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo 
 
     for (int i = 0; i < currentBlockSize; ++i)
     {
-        double window = 0.50 * (1 - cos((2 * M_PI * i) / (currentBlockSize  - 1)));
+        double window  = 0.54 - 0.46 * (1 - cos((2 * M_PI * i) / (currentBlockSize  - 1)));
         double sample  = (double)bufferToFill.buffer->getSample(0, i);
 
         signal[i] = window * sample;
