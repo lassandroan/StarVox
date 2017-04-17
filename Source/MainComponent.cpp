@@ -17,7 +17,9 @@ MainContentComponent::MainContentComponent()
 
     score = 0;
 
-    interpolation.reset(300, 0.25);
+    pitchCurrent = 0;
+
+    interpolation.reset(200, 0.25);
 
     stars.resize(25);
 
@@ -87,7 +89,24 @@ void MainContentComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo 
         }
     }
 
-    pitchTestIndex = (maxLocation * currentSampleRate / currentBlockSize);
+    int max2 = minIndex;
+    int maxsearch = maxLocation * 3 / 4;
+    for (int i = minIndex; i < maxsearch; ++i)
+    {
+        if (spectrum[i] > spectrum[max2])
+        {
+            max2 = i;
+        }
+    }
+    if (abs(max2 * 2 - maxLocation) < 4)
+    {
+        if (spectrum[max2] / spectrum[maxLocation] > 0.2)
+        {
+            maxLocation = max2;
+        }
+    }
+
+    pitchCurrent = (maxLocation * currentSampleRate / currentBlockSize) / 2;
 
 }
 
@@ -118,10 +137,13 @@ void MainContentComponent::timerCallback()
         }
     }
 
-    if (RMSTest > 0.05)
+    if (RMSTest > 0.005)
     {
-        float diff = fmin(1.0f, (float)pitchTestIndex / 2000.0f);
-        interpolation.setValue((768.0f - 64.0f) - ceil((768.0f - 64.0f) * diff));
+        if (pitchCurrent > 200)
+        {
+            float diff = fmin(1.0f, (float)pitchCurrent / 2000.0f);
+            interpolation.setValue((768.0f - 64.0f) - ceil((768.0f - 64.0f) * diff));
+        }
     }
     else
     {

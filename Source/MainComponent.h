@@ -29,7 +29,7 @@ struct MainContentComponent : juce::AudioAppComponent,
     int currentBlockSize;
     int currentSampleRate;
 
-    int pitchTestIndex;
+    int pitchCurrent;
 
     float RMSTest;
 
