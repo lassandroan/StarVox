@@ -30,6 +30,7 @@ struct MainContentComponent : juce::AudioAppComponent,
     int currentSampleRate;
 
     int pitchCurrent;
+    int pitchLast;
 
     float RMSTest;
 

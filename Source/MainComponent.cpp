@@ -18,6 +18,7 @@ MainContentComponent::MainContentComponent()
     score = 0;
 
     pitchCurrent = 0;
+    pitchLast = 0;
 
     interpolation.reset(200, 0.25);
 
@@ -106,7 +107,8 @@ void MainContentComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo 
         }
     }
 
-    pitchCurrent = (maxLocation * currentSampleRate / currentBlockSize) / 2;
+    pitchCurrent = (((maxLocation * currentSampleRate / currentBlockSize)) + pitchLast) / 2;
+    pitchLast = pitchCurrent;
 
 }
 
@@ -141,7 +143,8 @@ void MainContentComponent::timerCallback()
     {
         if (pitchCurrent > 200)
         {
-            float diff = fmin(1.0f, (float)pitchCurrent / 2000.0f);
+            printf("%d\n", pitchCurrent);
+            float diff = fmin(1.0f, (float)pitchCurrent / 1000.0f);
             interpolation.setValue((768.0f - 64.0f) - ceil((768.0f - 64.0f) * diff));
         }
     }
