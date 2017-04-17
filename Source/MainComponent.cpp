@@ -15,10 +15,6 @@ MainContentComponent::MainContentComponent()
     coin.setBounds(0, 0, 16, 16);
     player.setBounds(25, 384-32, 32, 32);
 
-    playerVelocity = 0.0f;
-
-    pitchTest = 0;
-
     score = 0;
 
     interpolation.reset(300, 0.25);

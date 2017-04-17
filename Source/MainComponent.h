@@ -29,14 +29,9 @@ struct MainContentComponent : juce::AudioAppComponent,
     int currentBlockSize;
     int currentSampleRate;
 
-    double pitchTest;
     int pitchTestIndex;
 
     float RMSTest;
-
-    //===========================================================================
-
-    juce::KeyPress currentKeyPress;
 
     //===========================================================================
 
@@ -51,8 +46,6 @@ struct MainContentComponent : juce::AudioAppComponent,
     juce::Rectangle<int> player;
 
     int score;
-
-    float playerVelocity;
 
 };
 
