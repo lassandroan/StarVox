@@ -4,9 +4,15 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 struct MainContentComponent : juce::AudioAppComponent,
-                             juce::Timer,
+                             juce::MultiTimer,
                             juce::KeyListener
 {
+
+    enum TimerIds
+    {
+        Frame,
+        Pitch
+    };
 
     MainContentComponent();
 
@@ -20,7 +26,7 @@ struct MainContentComponent : juce::AudioAppComponent,
 
     bool keyPressed(const juce::KeyPress& key, juce::Component* origin) override;
 
-    void timerCallback() override;
+    void timerCallback(int timerID) override;
 
     void paint (juce::Graphics& g) override;
 
@@ -30,7 +36,8 @@ struct MainContentComponent : juce::AudioAppComponent,
     int currentSampleRate;
 
     int pitchCurrent;
-    int pitchLast;
+
+    int pitchControl;
 
     float RMSTest;
 

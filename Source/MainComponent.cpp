@@ -18,7 +18,7 @@ MainContentComponent::MainContentComponent()
     score = 0;
 
     pitchCurrent = 0;
-    pitchLast = 0;
+    pitchControl = 0;
 
     interpolation.reset(200, 0.25);
 
@@ -40,7 +40,8 @@ MainContentComponent::~MainContentComponent()
 void MainContentComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
 
-    startTimer(1000/60);
+    startTimer(Frame, 1000/60);
+    startTimer(Pitch, 250);
 
     currentBlockSize = samplesPerBlockExpected;
     currentSampleRate = sampleRate;
@@ -107,8 +108,7 @@ void MainContentComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo 
         }
     }
 
-    pitchCurrent = (((maxLocation * currentSampleRate / currentBlockSize)) + pitchLast) / 2;
-    pitchLast = pitchCurrent;
+    pitchCurrent = (maxLocation * currentSampleRate) / currentBlockSize;
 
 }
 
@@ -124,8 +124,15 @@ bool MainContentComponent::keyPressed(const juce::KeyPress& key, juce::Component
 
 }
 
-void MainContentComponent::timerCallback()
+void MainContentComponent::timerCallback(int timerID)
 {
+
+    if (timerID == Pitch)
+    {
+
+        pitchControl = pitchCurrent;
+        return;
+    }
 
     for (int i = 0; i < stars.size(); ++i)
     {
@@ -139,12 +146,11 @@ void MainContentComponent::timerCallback()
         }
     }
 
-    if (RMSTest > 0.005)
+    if (RMSTest > 0.025)
     {
-        if (pitchCurrent > 200)
+        if (pitchControl > 200)
         {
-            printf("%d\n", pitchCurrent);
-            float diff = fmin(1.0f, (float)pitchCurrent / 1000.0f);
+            float diff = fmin(1.0f, powf((float)pitchControl / 1000.0f, 2.0f));
             interpolation.setValue((768.0f - 64.0f) - ceil((768.0f - 64.0f) * diff));
         }
     }
