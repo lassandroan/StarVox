@@ -87,7 +87,7 @@ void MainContentComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo 
         }
     }
 
-    pitchTestIndex = (maxLocation * currentSampleRate / currentBlockSize) / 2;
+    pitchTestIndex = (maxLocation * currentSampleRate / currentBlockSize);
 
 }
 
@@ -120,7 +120,7 @@ void MainContentComponent::timerCallback()
 
     if (RMSTest > 0.05)
     {
-        float diff = (float)pitchTestIndex / 2000.0f;
+        float diff = fmin(1.0f, (float)pitchTestIndex / 2000.0f);
         interpolation.setValue((768.0f - 64.0f) - ceil((768.0f - 64.0f) * diff));
     }
     else
