@@ -23,6 +23,14 @@ MainContentComponent::MainContentComponent()
 
     interpolation.reset(300, 0.25);
 
+    stars.resize(25);
+
+    for (int i = 0; i < stars.size(); ++i)
+    {
+        juce::Point<int>& star = stars.getReference(i);
+        star.setXY(rand.nextInt(768), rand.nextInt(768));
+    }
+
 }
 
 MainContentComponent::~MainContentComponent()
@@ -33,8 +41,7 @@ MainContentComponent::~MainContentComponent()
 void MainContentComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
 
-    startTimer(FRAME_TIMER, 1000/60);
-    startTimer(OUTPUT_TIMER, 250);
+    startTimer(1000/60);
 
     currentBlockSize = samplesPerBlockExpected;
     currentSampleRate = sampleRate;
@@ -100,16 +107,20 @@ bool MainContentComponent::keyPressed(const juce::KeyPress& key, juce::Component
 
 }
 
-void MainContentComponent::timerCallback(int timerID)
+void MainContentComponent::timerCallback()
 {
 
-    if (timerID == OUTPUT_TIMER)
+    for (int i = 0; i < stars.size(); ++i)
     {
-        printf("%f, %d\n", RMSTest, pitchTestIndex);
-        return;
-    }
+        juce::Point<int>& star = stars.getReference(i);
 
-    juce::Random rand;
+        star.addXY(-10, 0);
+
+        if (star.getX() < 0)
+        {
+            star.setXY(769, rand.nextInt(768));
+        }
+    }
 
     if (RMSTest > 0.05)
     {
@@ -145,10 +156,17 @@ void MainContentComponent::paint(juce::Graphics& g)
     int width = getWidth();
     int height = getHeight();
 
-    g.fillAll (juce::Colours::white);
+    g.fillAll (juce::Colours::black);
+
+    g.setColour(juce::Colours::white);
+    for (int i = 0; i < stars.size(); ++i)
+    {
+        juce::Point<int>& star = stars.getReference(i);
+        g.setPixel(star.x, star.y);
+    }
 
     g.setFont(48);
-    g.setColour(juce::Colours::grey);
+    g.setColour(juce::Colours::darkgrey);
     g.drawText(juce::String(score), 0, 0, width, height, juce::Justification::centred);
 
     int cX = coin.getX();
@@ -156,15 +174,15 @@ void MainContentComponent::paint(juce::Graphics& g)
     int cW = coin.getWidth();
     int cH = coin.getHeight();
 
-    g.setColour(juce::Colours::cadetblue);
-    g.fillRect(cX, cY, cW, cH);
+    g.setColour(juce::Colours::gold);
+    g.fillEllipse(cX, cY, cW, cH);
 
     int pX = player.getX();
     int pY = player.getY();
     int pW = player.getWidth();
     int pH = player.getHeight();
 
-    g.setColour(juce::Colours::red);
+    g.setColour(juce::Colours::cadetblue);
     juce::Path p;
     p.startNewSubPath(pX, pY);
     p.addTriangle(pX, pY, pX, pY + pH, pX + pW, pY + pH/2);
