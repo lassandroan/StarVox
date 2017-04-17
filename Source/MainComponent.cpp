@@ -12,12 +12,16 @@ MainContentComponent::MainContentComponent()
     addKeyListener(this);
     setWantsKeyboardFocus(true);
 
-    floor.setBounds(0, 768 - 128, 768, 128);
+    coin.setBounds(0, 0, 16, 16);
     player.setBounds(25, 384-32, 32, 32);
 
     playerVelocity = 0.0f;
 
     pitchTest = 0;
+
+    score = 0;
+
+    interpolation.reset(300, 0.25);
 
 }
 
@@ -30,7 +34,7 @@ void MainContentComponent::prepareToPlay(int samplesPerBlockExpected, double sam
 {
 
     startTimer(FRAME_TIMER, 1000/60);
-    startTimer(OUTPUT_TIMER, 100);
+    startTimer(OUTPUT_TIMER, 250);
 
     currentBlockSize = samplesPerBlockExpected;
     currentSampleRate = sampleRate;
@@ -92,8 +96,6 @@ void MainContentComponent::releaseResources()
 bool MainContentComponent::keyPressed(const juce::KeyPress& key, juce::Component* origin)
 {
 
-    playerVelocity -= 4.0;
-
     return true;
 
 }
@@ -103,14 +105,34 @@ void MainContentComponent::timerCallback(int timerID)
 
     if (timerID == OUTPUT_TIMER)
     {
-
-        float diff = ((float)pitchTestIndex / 2000.0f);
-        player.setY(576.0f - ((576.0f - 192.0f) * diff) - 32.0f);
-
-        printf("%f : %d\n", RMSTest, pitchTestIndex);
-
+        printf("%f, %d\n", RMSTest, pitchTestIndex);
         return;
+    }
 
+    juce::Random rand;
+
+    if (RMSTest > 0.05)
+    {
+        float diff = (float)pitchTestIndex / 2000.0f;
+        interpolation.setValue((768.0f - 64.0f) - ceil((768.0f - 64.0f) * diff));
+    }
+    else
+    {
+        interpolation.setValue(768 - 64);
+    }
+
+    player.setY(interpolation.getNextValue());
+
+    coin.translate(-5, 0);
+
+    if (player.intersects(coin))
+    {
+        coin.setPosition(768, rand.nextInt(768 - 32) + 16);
+        score++;
+    }
+    else if (coin.getX() <= -16)
+    {
+        coin.setPosition(768, rand.nextInt(768 - 32) + 16);
     }
 
     repaint();
@@ -119,10 +141,23 @@ void MainContentComponent::timerCallback(int timerID)
 
 void MainContentComponent::paint(juce::Graphics& g)
 {
+
+    int width = getWidth();
+    int height = getHeight();
+
     g.fillAll (juce::Colours::white);
 
-    g.setColour(juce::Colours::black);
-    g.fillRect(floor);
+    g.setFont(48);
+    g.setColour(juce::Colours::grey);
+    g.drawText(juce::String(score), 0, 0, width, height, juce::Justification::centred);
+
+    int cX = coin.getX();
+    int cY = coin.getY();
+    int cW = coin.getWidth();
+    int cH = coin.getHeight();
+
+    g.setColour(juce::Colours::cadetblue);
+    g.fillRect(cX, cY, cW, cH);
 
     int pX = player.getX();
     int pY = player.getY();

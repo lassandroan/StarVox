@@ -46,10 +46,13 @@ struct MainContentComponent : juce::AudioAppComponent,
 
     //===========================================================================
 
-    juce::Rectangle<int> floor;
+    juce::LinearSmoothedValue<float> interpolation;
 
+    juce::Rectangle<int> coin;
 
     juce::Rectangle<int> player;
+
+    int score;
 
     float playerVelocity;
 
